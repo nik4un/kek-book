@@ -1,0 +1,16 @@
+{
+  "name": "kek-book",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Проект «Кексобукинг»",
+  "author": "Nik4un",
+  "scripts": {
+    "server": "browser-sync start --server --files \"css/*.css, js/*.js, *.html\""
+  },
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "eslint": "^4.14.0",
+    "eslint-config-htmlacademy": "^0.3.2"
+  }
+}
