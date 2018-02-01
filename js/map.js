@@ -67,7 +67,7 @@ var getRandomFromArray = function (arr, num) {
   num = num || arr.length;
   var resultElements = [];
   for (var i = 0; i < num; i += 1) {
-    resultElements[i] = arr.splice((Math.floor(Math.random() * arr.length)), 1);
+    resultElements[i] = arr.splice((Math.floor(Math.random() * arr.length)), 1)[0];
   }
   return resultElements;
 };
@@ -81,6 +81,8 @@ var getOffers = function (num) {
   var resultArr = [];
   var randomAutors = getRandomFromArray(AUTOR_NUMBERS, num);
   var randomObjects = getRandomFromArray(OFFER_OBJECTS, num);
+  console.log('randomAutors: ', randomAutors);
+  console.log('randomObjects: ', randomObjects);
   var locationX;
   var locationY;
   for (var i = 0; i < num; i += 1) {
@@ -90,10 +92,10 @@ var getOffers = function (num) {
       author: {
         avatar: 'img/avatars/user' + randomAutors[i] + '.png'},
       offer: {
-        title: randomObjects[i][0][0],
+        title: randomObjects[i][0],
         address: locationX + ', ' + locationY,
         price: getRandomInteger(PRICE.min, PRICE.max),
-        type: randomObjects[i][0][1],
+        type: randomObjects[i][1],
         rooms: getRandomInteger(ROOMS.min, ROOMS.max),
         guests: getRandomInteger(GUESTS.min, GUESTS.max),
         checkin: CHECKIN_TIME[getRandomInteger(0, CHECKIN_TIME.length - 1)],
