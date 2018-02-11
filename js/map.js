@@ -46,6 +46,9 @@ var POINT_LOCATION = {
   yMin: 200,
   yMax: 700
 };
+//  клавиатурные коды
+var ESC_KEYCODE = 27;
+var ENTER_KEYCODE = 13;
 
 /**
  * случайное целое число в диапазоне от min до max, включая min и max
@@ -65,9 +68,10 @@ var getRandomInteger = function (min, max) {
  */
 var getRandomFromArray = function (arr, num) {
   num = num || arr.length;
+  var inetrArr = Array.from(arr);
   var resultElements = [];
   for (var i = 0; i < num; i += 1) {
-    resultElements[i] = arr.splice((Math.floor(Math.random() * arr.length)), 1)[0];
+    resultElements[i] = inetrArr.splice(Math.floor(Math.random() * inetrArr.length), 1)[0];
   }
   return resultElements;
 };
@@ -81,8 +85,6 @@ var getOffers = function (num) {
   var resultArr = [];
   var randomAutors = getRandomFromArray(AUTOR_NUMBERS, num);
   var randomObjects = getRandomFromArray(OFFER_OBJECTS, num);
-  console.log('randomAutors: ', randomAutors);
-  console.log('randomObjects: ', randomObjects);
   var locationX;
   var locationY;
   for (var i = 0; i < num; i += 1) {
@@ -125,11 +127,11 @@ var getOffers = function (num) {
 var getStringForRoomsAndGuest = function (roomsNum, guestsNum) {
   var roomsStr;
   var guestsStr;
+  guestsStr = guestsNum === 1 ? guestsNum + ' гостя' : guestsNum + ' гостей';
   if (roomsNum > 4) {
     roomsStr = roomsNum + ' комнат';
   } else {
     roomsStr = roomsNum === 1 ? roomsNum + ' комната' : roomsNum + ' комнаты';
-    guestsStr = guestsNum === 1 ? guestsNum + ' гостя' : guestsNum + ' гостей';
   }
   return roomsStr + ' для ' + guestsStr;
 };
@@ -165,47 +167,118 @@ var getFeatureItems = function (features) {
 // Создание массива из OFFER_NUMS предложений недвижимости
 var offers = getOffers(OFFER_NUMS);
 
-//  Создание меток предложений жилья на карте
 var map = document.querySelector('.map');
-var mapPin = map.querySelector('.map__pin');
+var mapPin = document.querySelector('template').content.querySelector('.map__pin');
+var mapPins = map.querySelector('.map__pins');
 var fragment = document.createDocumentFragment();
+var mapPinMain = map.querySelector('.map__pin--main');
+var noticeForm = document.querySelector('.notice__form');
+
+//  обработчик для CLICK на 'popup__close'
+var onPopupCloseClicl = function () {
+  var popupClose = document.querySelector('.popup__close');
+  var activePin = document.querySelector('.map__pin--active');
+  map.removeChild(map.querySelector('.map__card'));
+  activePin.classList.remove('map__pin--active');
+  popupClose.removeEventListener('click', onPopupCloseClicl);
+  document.removeEventListener('keydown', onPressEsc);
+  popupClose.addEventListener('keydown', onPopupPressEnter);
+};
+
+//  обработчик для нажатия ESC при открытом 'popup'
+var onPressEsc = function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    onPopupCloseClicl();
+  }
+};
+
+//  обработчик для нажатия ENTER на 'popup__close'
+var onPopupPressEnter = function (evt) {
+  if (evt.keyCode === ENTER_KEYCODE) {
+    onPopupCloseClicl();
+  }
+};
+
+//  обработчик для воздействия на 'mapPin'
+var onMapPinClickAndPressEnter = function (offer) {
+  return function (evt) {
+    if (evt.keyCode === ENTER_KEYCODE || evt.type === 'click') {
+      var activePin = document.querySelector('.map__pin--active');
+      var mapCard = document.querySelector('.map__card');
+      if (activePin) {
+        activePin.classList.remove('map__pin--active');
+      }
+      evt.currentTarget.classList.add('map__pin--active');
+      if (mapCard) {
+        map.removeChild(mapCard);
+      }
+      map.insertBefore(getOfferCard(offer), document.querySelector('map__filters-container'));
+      var popupClose = document.querySelector('.popup__close');
+      popupClose.addEventListener('click', onPopupCloseClicl);
+      document.addEventListener('keydown', onPressEsc);
+      popupClose.addEventListener('keydown', onPopupPressEnter);
+    }
+  };
+};
+
 //   функция, задающая расположение и аватар для метки
-var getMapElement = function (offersItem) {
-  var mapElement = mapPin.cloneNode(true);
+var getMapPinElement = function (offersItem) {
+  var mapPinElement = mapPin.cloneNode(true);
   //  Поправка, чтобы на координате находилось остриё указателя
   var pointerLocationX = offersItem.offer.location.x;
   var pointerLocationY = offersItem.offer.location.y - 50;
-  mapElement.style.left = pointerLocationX + 'px';
-  mapElement.style.top = pointerLocationY + 'px';
-  mapElement.querySelector('img').src = offersItem.author.avatar;
-  fragment.appendChild(mapElement);
+  mapPinElement.style.left = pointerLocationX + 'px';
+  mapPinElement.style.top = pointerLocationY + 'px';
+  mapPinElement.querySelector('img').src = offersItem.author.avatar;
+  mapPinElement.addEventListener('click', onMapPinClickAndPressEnter(offersItem));
+  fragment.appendChild(mapPinElement);
 };
 //  метки для всего массива предложений
 for (var i = 0; i < OFFER_NUMS; i += 1) {
-  getMapElement(offers[i]);
+  getMapPinElement(offers[i]);
 }
 
 //  создание объявления на основе ноды в теге <template>
 var getOfferCard = function (offersItem) {
   var templateBody = document.querySelector('template').content.querySelector('article.map__card');
-  var cardOffer = templateBody.cloneNode(true);
-  var featureList = cardOffer.querySelector('.popup__features');
-  // var pictureList = cardOffer.querySelector('.popup__pictures');
-  cardOffer.querySelector('img').src = offersItem.author.avatar;
-  cardOffer.querySelector('h3').textContent = offersItem.offer.title;
-  cardOffer.querySelector('small').textContent = offersItem.offer.address;
-  cardOffer.querySelector('p:nth-of-type(2)').textContent = offersItem.offer.price + ' ₽/ночь';
-  cardOffer.querySelector('h4').textContent = APARTMENT_TYPE_RU[offersItem.offer.type];
-  cardOffer.querySelector('p:nth-of-type(3)').textContent =
+  var offerCard = templateBody.cloneNode(true);
+  var featureList = offerCard.querySelector('.popup__features');
+  // var pictureList = offerCard.querySelector('.popup__pictures');
+  offerCard.querySelector('img').src = offersItem.author.avatar;
+  offerCard.querySelector('h3').textContent = offersItem.offer.title;
+  offerCard.querySelector('small').textContent = offersItem.offer.address;
+  offerCard.querySelector('p:nth-of-type(2)').textContent = offersItem.offer.price + ' ₽/ночь';
+  offerCard.querySelector('h4').textContent = APARTMENT_TYPE_RU[offersItem.offer.type];
+  offerCard.querySelector('p:nth-of-type(3)').textContent =
     getStringForRoomsAndGuest(offersItem.offer.rooms, offersItem.offer.guests);
-  cardOffer.querySelector('p:nth-of-type(4)').textContent =
+  offerCard.querySelector('p:nth-of-type(4)').textContent =
     'Заезд после ' + offersItem.offer.checkin + ', выезд до ' + offersItem.offer.checkout;
   clearList(featureList);
   featureList.appendChild(getFeatureItems(offersItem.offer.features));
-  cardOffer.querySelector('p:nth-of-type(5)').textContent = offersItem.offer.description;
-  return cardOffer;
+  offerCard.querySelector('p:nth-of-type(5)').textContent = offersItem.offer.description;
+  return offerCard;
 };
 
-map.classList.remove('map--faded');
-map.appendChild(fragment);
-map.insertBefore(getOfferCard(offers[0]), document.querySelector('map__filters-container'));
+//  обработчик для нажатия кнопки мыши на 'mapPinMain'
+var onMainMapPinMouseUp = function () {
+  map.classList.remove('map--faded');
+  mapPins.insertBefore(fragment, mapPinMain);
+  noticeForm.classList.remove('notice__form--disabled');
+  mapPinMain.removeEventListener('mouseup', onMainMapPinMouseUp);
+  mapPinMain.removeEventListener('keydown', onMainMapPinPressEnter);
+};
+
+//  обработчик для события нажатия кнопки клавиатуры на сфокусированном 'mapPinMain'
+var onMainMapPinPressEnter = function (evt) {
+  if (evt.keyCode === ENTER_KEYCODE) {
+    map.classList.remove('map--faded');
+    mapPins.insertBefore(fragment, mapPinMain);
+    noticeForm.classList.remove('notice__form--disabled');
+    mapPinMain.removeEventListener('mouseup', onMainMapPinMouseUp);
+    mapPinMain.removeEventListener('keydown', onMainMapPinPressEnter);
+  }
+};
+
+//  установка отслеживания событий на 'map__pin--main'
+mapPinMain.addEventListener('mouseup', onMainMapPinMouseUp);
+mapPinMain.addEventListener('keydown', onMainMapPinPressEnter);
