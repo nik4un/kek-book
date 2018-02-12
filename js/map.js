@@ -17,6 +17,12 @@ var PRICE = {
   min: 100,
   max: 1e6
 };
+var MIN_PRICES_BY_APARTMENT_TYPES = {
+  bungalo: 0,
+  flat: 1000,
+  house: 5000,
+  palace: 1e4
+};
 var APARTMENT_TYPE_RU = {
   flat: 'Квартира',
   house: 'Дом',
@@ -46,6 +52,17 @@ var POINT_LOCATION = {
   yMin: 200,
   yMax: 700
 };
+var NUMBER_OF_ROOMS_FOR_GUESTS = {
+  '1': ['1'],
+  '2': ['2', '1'],
+  '3': ['2', '1', '3'],
+  '100': ['0']
+};
+//  поправка для указателя места предложения жилья
+var LOCATION_OFFSET = {
+  x: 0,
+  y: -50
+};
 //  клавиатурные коды
 var ESC_KEYCODE = 27;
 var ENTER_KEYCODE = 13;
@@ -57,7 +74,7 @@ var ENTER_KEYCODE = 13;
  * @return {number}     случайное целое число
  */
 var getRandomInteger = function (min, max) {
-  return Math.floor(min + (Math.random() * (max + 1 - min)));
+  return Math.floor(min + Math.random() * (max + 1 - min));
 };
 
 /**
@@ -71,7 +88,10 @@ var getRandomFromArray = function (arr, num) {
   var inetrArr = Array.from(arr);
   var resultElements = [];
   for (var i = 0; i < num; i += 1) {
-    resultElements[i] = inetrArr.splice(Math.floor(Math.random() * inetrArr.length), 1)[0];
+    resultElements[i] = inetrArr.splice(
+        Math.floor(Math.random() * inetrArr.length),
+        1
+    )[0];
   }
   return resultElements;
 };
@@ -92,7 +112,8 @@ var getOffers = function (num) {
     locationY = getRandomInteger(POINT_LOCATION.yMin, POINT_LOCATION.yMax);
     resultArr[i] = {
       author: {
-        avatar: 'img/avatars/user' + randomAutors[i] + '.png'},
+        avatar: 'img/avatars/user' + randomAutors[i] + '.png'
+      },
       offer: {
         title: randomObjects[i][0],
         address: locationX + ', ' + locationY,
@@ -168,11 +189,14 @@ var getFeatureItems = function (features) {
 var offers = getOffers(OFFER_NUMS);
 
 var map = document.querySelector('.map');
-var mapPin = document.querySelector('template').content.querySelector('.map__pin');
+var mapPin = document
+    .querySelector('template')
+    .content.querySelector('.map__pin');
 var mapPins = map.querySelector('.map__pins');
 var fragment = document.createDocumentFragment();
 var mapPinMain = map.querySelector('.map__pin--main');
 var noticeForm = document.querySelector('.notice__form');
+var addressInput = document.querySelector('#address');
 
 //  обработчик для CLICK на 'popup__close'
 var onPopupCloseClicl = function () {
@@ -212,7 +236,10 @@ var onMapPinClickAndPressEnter = function (offer) {
       if (mapCard) {
         map.removeChild(mapCard);
       }
-      map.insertBefore(getOfferCard(offer), document.querySelector('map__filters-container'));
+      map.insertBefore(
+          getOfferCard(offer),
+          document.querySelector('map__filters-container')
+      );
       var popupClose = document.querySelector('.popup__close');
       popupClose.addEventListener('click', onPopupCloseClicl);
       document.addEventListener('keydown', onPressEsc);
@@ -224,13 +251,16 @@ var onMapPinClickAndPressEnter = function (offer) {
 //   функция, задающая расположение и аватар для метки
 var getMapPinElement = function (offersItem) {
   var mapPinElement = mapPin.cloneNode(true);
-  //  Поправка, чтобы на координате находилось остриё указателя
-  var pointerLocationX = offersItem.offer.location.x;
-  var pointerLocationY = offersItem.offer.location.y - 50;
+  //  Поправка, чтобы на координате находилось остриё указателя locationOffset
+  var pointerLocationX = offersItem.offer.location.x + LOCATION_OFFSET.x;
+  var pointerLocationY = offersItem.offer.location.y + LOCATION_OFFSET.y;
   mapPinElement.style.left = pointerLocationX + 'px';
   mapPinElement.style.top = pointerLocationY + 'px';
   mapPinElement.querySelector('img').src = offersItem.author.avatar;
-  mapPinElement.addEventListener('click', onMapPinClickAndPressEnter(offersItem));
+  mapPinElement.addEventListener(
+      'click',
+      onMapPinClickAndPressEnter(offersItem)
+  );
   fragment.appendChild(mapPinElement);
 };
 //  метки для всего массива предложений
@@ -240,22 +270,34 @@ for (var i = 0; i < OFFER_NUMS; i += 1) {
 
 //  создание объявления на основе ноды в теге <template>
 var getOfferCard = function (offersItem) {
-  var templateBody = document.querySelector('template').content.querySelector('article.map__card');
+  var templateBody = document
+      .querySelector('template')
+      .content.querySelector('article.map__card');
   var offerCard = templateBody.cloneNode(true);
   var featureList = offerCard.querySelector('.popup__features');
   // var pictureList = offerCard.querySelector('.popup__pictures');
   offerCard.querySelector('img').src = offersItem.author.avatar;
   offerCard.querySelector('h3').textContent = offersItem.offer.title;
   offerCard.querySelector('small').textContent = offersItem.offer.address;
-  offerCard.querySelector('p:nth-of-type(2)').textContent = offersItem.offer.price + ' ₽/ночь';
-  offerCard.querySelector('h4').textContent = APARTMENT_TYPE_RU[offersItem.offer.type];
-  offerCard.querySelector('p:nth-of-type(3)').textContent =
-    getStringForRoomsAndGuest(offersItem.offer.rooms, offersItem.offer.guests);
+  offerCard.querySelector('p:nth-of-type(2)').textContent =
+    offersItem.offer.price + ' ₽/ночь';
+  offerCard.querySelector('h4').textContent =
+    APARTMENT_TYPE_RU[offersItem.offer.type];
+  offerCard.querySelector(
+      'p:nth-of-type(3)'
+  ).textContent = getStringForRoomsAndGuest(
+      offersItem.offer.rooms,
+      offersItem.offer.guests
+  );
   offerCard.querySelector('p:nth-of-type(4)').textContent =
-    'Заезд после ' + offersItem.offer.checkin + ', выезд до ' + offersItem.offer.checkout;
+    'Заезд после ' +
+    offersItem.offer.checkin +
+    ', выезд до ' +
+    offersItem.offer.checkout;
   clearList(featureList);
   featureList.appendChild(getFeatureItems(offersItem.offer.features));
-  offerCard.querySelector('p:nth-of-type(5)').textContent = offersItem.offer.description;
+  offerCard.querySelector('p:nth-of-type(5)').textContent =
+    offersItem.offer.description;
   return offerCard;
 };
 
@@ -271,14 +313,62 @@ var onMainMapPinMouseUp = function () {
 //  обработчик для события нажатия кнопки клавиатуры на сфокусированном 'mapPinMain'
 var onMainMapPinPressEnter = function (evt) {
   if (evt.keyCode === ENTER_KEYCODE) {
-    map.classList.remove('map--faded');
-    mapPins.insertBefore(fragment, mapPinMain);
-    noticeForm.classList.remove('notice__form--disabled');
-    mapPinMain.removeEventListener('mouseup', onMainMapPinMouseUp);
-    mapPinMain.removeEventListener('keydown', onMainMapPinPressEnter);
+    onMainMapPinMouseUp();
   }
 };
 
 //  установка отслеживания событий на 'map__pin--main'
 mapPinMain.addEventListener('mouseup', onMainMapPinMouseUp);
 mapPinMain.addEventListener('keydown', onMainMapPinPressEnter);
+
+//  установка координат объекта element в поле ввода адреса
+var setAddress = function (element) {
+  var locationX =
+    parseInt(getComputedStyle(element).getPropertyValue('left'), 10) -
+    LOCATION_OFFSET.x;
+  var locationY =
+    parseInt(getComputedStyle(element).getPropertyValue('top'), 10) -
+    LOCATION_OFFSET.y;
+  addressInput.value = locationX + ', ' + locationY;
+};
+//  установка координат объекта mapPinMain
+setAddress(mapPinMain);
+
+//  Синхронизация полей «время заезда» и «время выезда»
+var timeInField = document.querySelector('#timein');
+var timeOutField = document.querySelector('#timeout');
+
+var onChangeTimeIn = function () {
+  timeOutField.value = timeInField.value;
+};
+var onChangeTimeOut = function () {
+  timeInField.value = timeOutField.value;
+};
+
+timeInField.addEventListener('change', onChangeTimeIn);
+timeOutField.addEventListener('change', onChangeTimeOut);
+
+//  синхронизация минимальнай цены с типом жилья
+var apartmentType = document.querySelector('#type');
+var apartmentPrice = document.querySelector('#price');
+
+var onChangeApartmentType = function () {
+  apartmentPrice.min = MIN_PRICES_BY_APARTMENT_TYPES[apartmentType.value];
+};
+
+apartmentType.addEventListener('change', onChangeApartmentType);
+
+//  синхронизация количества комнат и количества гостей
+var roomNumber = document.querySelector('#room_number');
+var capacity = document.querySelector('#capacity');
+var capacityOptions = capacity.querySelectorAll('option');
+
+var onChangeRoomNumber = function () {
+  var availableValues = NUMBER_OF_ROOMS_FOR_GUESTS[roomNumber.value];
+  capacityOptions.forEach(function (item) {
+    item.disabled = !availableValues.includes(item.value);
+    item.selected = item.value === availableValues[0];
+  });
+};
+
+roomNumber.addEventListener('change', onChangeRoomNumber);
