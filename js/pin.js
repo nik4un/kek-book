@@ -61,9 +61,9 @@
     var mapPinElement = window.elements.mapPin.cloneNode(true);
     //  Поправка, чтобы на координате находилось остриё указателя locationOffset
     var pointerLocationX =
-      offersItem.offer.location.x + window.data.LOCATION_OFFSET.x;
+      offersItem.offer.location.x + window.data.PIN_LOCATION_OFFSET.x;
     var pointerLocationY =
-      offersItem.offer.location.y + window.data.LOCATION_OFFSET.y;
+      offersItem.offer.location.y + window.data.PIN_LOCATION_OFFSET.y;
     mapPinElement.style.left = pointerLocationX + 'px';
     mapPinElement.style.top = pointerLocationY + 'px';
     mapPinElement.querySelector('img').src = offersItem.author.avatar;

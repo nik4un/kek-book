@@ -15,6 +15,5 @@
     noticeForm: notice.querySelector('.notice__form'),
     addressInput: document.querySelector('#address'),
     popupClose: document.querySelector('.popup__close'),
-
   };
 })();

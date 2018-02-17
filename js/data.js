@@ -38,7 +38,7 @@
     'conditioner'
   ];
   var POINT_LOCATION = {
-    xMin: 300,
+    xMin: 100,
     xMax: 1100,
     yMin: 200,
     yMax: 700
@@ -105,8 +105,14 @@
       house: 5000,
       palace: 1e4
     },
-    //  поправка для указателя места предложения жилья
-    LOCATION_OFFSET: {
+    POINT_LOCATION: POINT_LOCATION,
+    //  поправка для указателя MapPin
+    PIN_LOCATION_OFFSET: {
+      x: -5,
+      y: -38
+    },
+    //  поправка для указателя MainMapPin
+    MAIN_PIN_LOCATION_OFFSET: {
       x: 0,
       y: -50
     },
