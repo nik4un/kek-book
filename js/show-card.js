@@ -48,7 +48,7 @@
   };
 
   //  создание объявления на основе ноды в теге <template>
-  var getOfferCard = function (offersItem) {
+  window.showCard = function (offersItem) {
     var templateBody = document
         .querySelector('template')
         .content.querySelector('article.map__card');
@@ -80,7 +80,7 @@
     return offerCard;
   };
 
-  window.card = {
-    getOfferCard: getOfferCard,
-  };
+  // window.card = {
+  //   getOfferCard: getOfferCard,
+  // };
 })();

@@ -34,6 +34,9 @@
         mapPinMainLeft = maxX;
       }
       window.elements.mapPinMain.style.left = mapPinMainLeft + 'px';
+
+      //  установка координат указателя mapPinMain
+      setAddress(window.elements.mapPinMain);
     };
 
     var onMouseUp = function (upEvt) {
@@ -44,9 +47,6 @@
 
       if (!hasShifted) {
         window.elements.mapPinMain.click();
-      } else {
-        //  установка координат указателя mapPinMain
-        setAddress(window.elements.mapPinMain);
       }
     };
 
@@ -84,7 +84,18 @@
 
     //  установка координат объекта mapPinMain
     setAddress(window.elements.mapPinMain);
+
+    //  снятие запрета на редактирование полей формы
+    noticeFormElements.forEach(function (item) {
+      item.disabled = false;
+    });
   };
+
+  //  запрет редактирования всех полей формы
+  var noticeFormElements = Array.from(window.elements.noticeFormElements);
+  noticeFormElements.forEach(function (item) {
+    item.disabled = true;
+  });
 
   //  установка отслеживания событий на 'map__pin--main'
   window.elements.mapPinMain.addEventListener(
@@ -104,6 +115,6 @@
     var locationY =
       parseInt(getComputedStyle(element).getPropertyValue('top'), 10) -
       window.data.MAIN_PIN_LOCATION_OFFSET.y;
-    window.elements.addressInput.value = locationX + ', ' + locationY;
+    window.elements.addressInput.value = 'x: ' + locationX + ', y: ' + locationY;
   };
 })();

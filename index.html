@@ -128,8 +128,8 @@
       <fieldset class="form__element">
         <label for="timein">Время заезда и выезда</label>
         <select id="timein" name="timein">
-          <option value="12:00" selected>После 12</option>
-          <option value="13:00">После 13</option>
+          <option value="12:00">После 12</option>
+          <option value="13:00" selected>После 13</option>
           <option value="14:00">После 14</option>
         </select>
         <select id="timeout" name="timeout" title="Time to go out">
@@ -152,10 +152,11 @@
       <fieldset class="form__element">
         <label for="capacity">Количество мест</label>
         <select id="capacity" name="capacity">
-          <option value="3" selected>для 3 гостей</option>
-          <option value="2">для 2 гостей</option>
-          <option value="1">для 1 гостя</option>
-          <option value="0">не для гостей</option>
+          <option value="4" disabled>для 4 гостей</option>
+          <option value="3" disabled>для 3 гостей</option>
+          <option value="2" disabled>для 2 гостей</option>
+          <option value="1" selected>для 1 гостя</option>
+          <option value="0" disabled>не для гостей</option>
         </select>
       </fieldset>
 
@@ -248,10 +249,11 @@
 <script src="js/utils.js"></script>
 <script src="js/data.js"></script>
 <script src="js/elements.js"></script>
-<script src="js/card.js"></script>
+<script src="js/show-card.js"></script>
 <script src="js/pin.js"></script>
 <script src="js/map.js"></script>
+<script src="js/synchronize-fields.js"></script>
 <script src="js/form.js"></script>
-
+synchronize-fields.js
 </body>
 </html>

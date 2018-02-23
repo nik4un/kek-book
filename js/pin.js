@@ -45,7 +45,7 @@
           window.elements.map.removeChild(mapCard);
         }
         window.elements.map.insertBefore(
-            window.card.getOfferCard(offer),
+            window.showCard(offer),
             document.querySelector('map__filters-container')
         );
         var popupClose = document.querySelector('.popup__close');
