@@ -57,13 +57,13 @@
   };
 
   //   функция, задающая расположение и аватар для метки
-  var getMapPinElement = function (offersItem) {
+  window.getMapPinElement = function (offersItem) {
     var mapPinElement = window.elements.mapPin.cloneNode(true);
     //  Поправка, чтобы на координате находилось остриё указателя locationOffset
     var pointerLocationX =
-      offersItem.offer.location.x + window.data.PIN_LOCATION_OFFSET.x;
+      offersItem.location.x + window.data.PIN_LOCATION_OFFSET.x;
     var pointerLocationY =
-      offersItem.offer.location.y + window.data.PIN_LOCATION_OFFSET.y;
+      offersItem.location.y + window.data.PIN_LOCATION_OFFSET.y;
     mapPinElement.style.left = pointerLocationX + 'px';
     mapPinElement.style.top = pointerLocationY + 'px';
     mapPinElement.querySelector('img').src = offersItem.author.avatar;
@@ -73,8 +73,4 @@
     );
     window.fragment.appendChild(mapPinElement);
   };
-  //  метки для всего массива предложений
-  for (var i = 0; i < window.data.OFFER_NUMS; i += 1) {
-    getMapPinElement(window.data.offers[i]);
-  }
 })();

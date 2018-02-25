@@ -88,11 +88,11 @@
   };
 
   // массив из OFFER_NUMS предложений недвижимости
-  var offers = getOffers(OFFER_NUMS);
+  var offers = getOffers(OFFER_NUMS);  // eslint-disable-line
 
   window.data = {
     OFFER_NUMS: OFFER_NUMS,
-    offers: offers,
+    offers: null,
     APARTMENT_TYPE_RU: {
       flat: 'Квартира',
       house: 'Дом',

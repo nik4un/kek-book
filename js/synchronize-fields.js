@@ -13,11 +13,5 @@
     var index = masterField.selectedIndex;
     index = valuesOfMasterField.indexOf(masterField[index].value);
     callback(slaveField, valuesOfSlaveField[index]);
-
-    var onChangeField = function (evt) {
-      index = valuesOfMasterField.indexOf(evt.target.value);
-      callback(slaveField, valuesOfSlaveField[index]);
-    };
-    masterField.addEventListener('change', onChangeField);
   };
 })();

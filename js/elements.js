@@ -10,6 +10,7 @@
   window.elements = {
     map: map,
     mapPin: mapPin,
+    notice: notice,
     mapPins: map.querySelector('.map__pins'),
     mapPinMain: map.querySelector('.map__pin--main'),
     noticeForm: notice.querySelector('.notice__form'),

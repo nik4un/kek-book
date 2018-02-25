@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+  //  три функции для реализации перемещения главной метки
   var onMainMapPinMouseDown = function (evt) {
     evt.preventDefault();
     var hasShifted = false;
@@ -36,7 +37,7 @@
       window.elements.mapPinMain.style.left = mapPinMainLeft + 'px';
 
       //  установка координат указателя mapPinMain
-      setAddress(window.elements.mapPinMain);
+      window.setAddress();
     };
 
     var onMouseUp = function (upEvt) {
@@ -61,13 +62,16 @@
     }
   };
 
-  //  обработчик для отжатия кнопки мыши на 'mapPinMain'
+  //  запрет редактирования всех полей формы
+  var noticeFormElements = Array.from(window.elements.noticeFormElements);
+  noticeFormElements.forEach(function (item) {
+    item.disabled = true;
+  });
+
+
+  //  обработчик для инициализации работы с сайтом
   var onMainMapPinMouseUpFirst = function () {
     window.elements.map.classList.remove('map--faded');
-    window.elements.mapPins.insertBefore(
-        window.fragment,
-        window.elements.mapPinMain
-    );
     window.elements.noticeForm.classList.remove('notice__form--disabled');
     window.elements.mapPinMain.addEventListener(
         'mousedown',
@@ -83,19 +87,16 @@
     );
 
     //  установка координат объекта mapPinMain
-    setAddress(window.elements.mapPinMain);
+    window.setAddress();
+
+    //  получение данных о предложениях жилья с сервера
+    window.backend.load(onSuccessLoad, onErrorLoad);
 
     //  снятие запрета на редактирование полей формы
     noticeFormElements.forEach(function (item) {
       item.disabled = false;
     });
   };
-
-  //  запрет редактирования всех полей формы
-  var noticeFormElements = Array.from(window.elements.noticeFormElements);
-  noticeFormElements.forEach(function (item) {
-    item.disabled = true;
-  });
 
   //  установка отслеживания событий на 'map__pin--main'
   window.elements.mapPinMain.addEventListener(
@@ -107,14 +108,38 @@
       onMainMapPinPressEnter
   );
 
-  //  установка координат объекта element в поле ввода адреса
-  var setAddress = function (element) {
-    var locationX =
-      parseInt(getComputedStyle(element).getPropertyValue('left'), 10) -
-      window.data.MAIN_PIN_LOCATION_OFFSET.x;
-    var locationY =
-      parseInt(getComputedStyle(element).getPropertyValue('top'), 10) -
-      window.data.MAIN_PIN_LOCATION_OFFSET.y;
+  //  установка координат главной метки в поле ввода адреса
+  window.setAddress = function () {
+    var locationX = window.elements.mapPinMain.offsetLeft - window.data.MAIN_PIN_LOCATION_OFFSET.x;
+    var locationY = window.elements.mapPinMain.offsetTop - window.data.MAIN_PIN_LOCATION_OFFSET.y;
     window.elements.addressInput.value = 'x: ' + locationX + ', y: ' + locationY;
+  };
+
+  /**
+  * обработчик на успешное получение данных с сервера
+  * @param  {array} data [ массив объектов, описывающих предложение жилья ]
+  */
+  var onSuccessLoad = function (data) {
+    window.data.offers = data;
+    //  метки для всего массива предложений
+    for (var i = 0; i < window.data.offers.length; i += 1) {
+      window.getMapPinElement(window.data.offers[i]);
+    }
+    window.elements.mapPins.insertBefore(
+        window.fragment,
+        window.elements.mapPinMain
+    );
+    // window.elements.noticeForm.classList.remove('notice__form--disabled');
+  };
+
+  /**
+  * обработчик на возникновение ошибки при получении данных с сервера
+  * вывод сообщения в окне браузера
+  * @param  {string} error [ описание ошибки ]
+  */
+  var onErrorLoad = function (error) {
+    var messageError = error + ' Похожие предложения не могут быть отображены';
+    window.message.show('Ошибка!', messageError, window.message.color.ERROR);
+    // window.elements.noticeForm.classList.remove('notice__form--disabled');
   };
 })();
