@@ -1,6 +1,10 @@
 'use strict';
 
 (function () {
+  //  время задержки отрисовки меток после установки фильтра
+  var DECISION_TIME = 1000;
+  var timerOnUpdate;
+
   //  три функции для реализации перемещения главной метки
   var onMainMapPinMouseDown = function (evt) {
     evt.preventDefault();
@@ -68,6 +72,13 @@
     item.disabled = true;
   });
 
+  //  обработчик на изменение филтра
+  var onChangeFilter = function () {
+    clearTimeout(timerOnUpdate);
+    timerOnUpdate = setTimeout(function () {
+      window.showPins();
+    }, DECISION_TIME);
+  };
 
   //  обработчик для инициализации работы с сайтом
   var onMainMapPinMouseUpFirst = function () {
@@ -96,6 +107,8 @@
     noticeFormElements.forEach(function (item) {
       item.disabled = false;
     });
+
+    window.elements.filterForm.addEventListener('change', onChangeFilter);
   };
 
   //  установка отслеживания событий на 'map__pin--main'
@@ -121,15 +134,7 @@
   */
   var onSuccessLoad = function (data) {
     window.data.offers = data;
-    //  метки для всего массива предложений
-    for (var i = 0; i < window.data.offers.length; i += 1) {
-      window.getMapPinElement(window.data.offers[i]);
-    }
-    window.elements.mapPins.insertBefore(
-        window.fragment,
-        window.elements.mapPinMain
-    );
-    // window.elements.noticeForm.classList.remove('notice__form--disabled');
+    window.showPins();
   };
 
   /**

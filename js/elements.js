@@ -23,5 +23,11 @@
     apartmentPrice: document.querySelector('#price'),
     roomNumber: document.querySelector('#room_number'),
     capacity: document.querySelector('#capacity'),
+    filterForm: document.querySelector('.map__filters'),
+    houseTypeFilter: document.querySelector('#housing-type'),
+    priceFilter: document.querySelector('#housing-price'),
+    roomsNumberFilter: document.querySelector('#housing-rooms'),
+    guestsNumberFilter: document.querySelector('#housing-guests'),
+    featuresFilter: document.querySelector('#housing-features'),
   };
 })();

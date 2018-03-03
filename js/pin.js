@@ -1,6 +1,21 @@
 'use strict';
 
 (function () {
+  //  диапозон цен в меню выбора цен
+  var priceRange = {
+    low: {
+      min: 0,
+      max: 10000,
+    },
+    middle: {
+      min: 10000,
+      max: 50000,
+    },
+    high: {
+      min: 50000
+    }
+  };
+
   // фрагмент для меток предложений на карте
   window.fragment = document.createDocumentFragment();
 
@@ -57,7 +72,7 @@
   };
 
   //   функция, задающая расположение и аватар для метки
-  window.getMapPinElement = function (offersItem) {
+  var getMapPinElement = function (offersItem) {
     var mapPinElement = window.elements.mapPin.cloneNode(true);
     //  Поправка, чтобы на координате находилось остриё указателя locationOffset
     var pointerLocationX =
@@ -72,5 +87,89 @@
         onMapPinClickAndPressEnter(offersItem)
     );
     window.fragment.appendChild(mapPinElement);
+  };
+
+  /**
+   * [функция выявления параметров фильтров, установленных пользователем]
+   * @return {object} [объект с фильтрами и соответствующими им значениями]
+   */
+  var offerFilter = function () {
+    var featuresElements = Array.from(window.elements.featuresFilter.elements).filter(function (item) {
+      return item.checked;
+    });
+    return {
+      housingType: window.elements.houseTypeFilter.value,
+      housingPrice: window.elements.priceFilter.value,
+      roomsNumber: window.elements.roomsNumberFilter.value,
+      guestsNumber: window.elements.guestsNumberFilter.value,
+      price: window.elements.priceFilter.value,
+      features: featuresElements.map(function (item) {
+        return item.value;
+      }),
+    };
+  };
+
+  /**
+   * функция фильтрации списка предложений жилья
+   * @return {Array} [список предложений жилья, удовлетворяющих выбранным фильтрам]
+   */
+  var updateOffers = function () {
+    var filterCollect = offerFilter();
+    return window.data.offers.filter(function (item) {
+      var housingTypeCondition =
+        filterCollect.housingType === 'any'
+          ? true
+          : filterCollect.housingType === item.offer.type;
+      var housingPriceCondition = {
+        'any': true,
+        'low': item.offer.price >= priceRange.low.min && item.offer.price <= priceRange.low.max,
+        'middle': item.offer.price >= priceRange.middle.min && item.offer.price <= priceRange.middle.max,
+        'high': item.offer.price >= priceRange.high.min,
+      };
+      var housingRoomsCondition =
+        filterCollect.roomsNumber === 'any'
+          ? true
+          : Number(filterCollect.roomsNumber) === item.offer.rooms;
+      var housingGuestsCondition =
+        filterCollect.guestsNumber === 'any'
+          ? true
+          : Number(filterCollect.guestsNumber) === item.offer.guests;
+      var housingFeaturesCondition =
+        filterCollect.features.length === 0
+          ? true
+          : filterCollect.features.every(function (element) {
+            if (item.offer.features.length === 0) {
+              return false;
+            }
+            return item.offer.features.includes(element);
+          });
+      return housingTypeCondition && housingPriceCondition[filterCollect.housingPrice] && housingRoomsCondition && housingGuestsCondition && housingFeaturesCondition;
+    });
+  };
+
+  /**
+   * функция отрисовки меток жилья на карте
+   */
+  window.showPins = function () {
+    //  закрытие открытой карты жилья
+    if (document.querySelector('.popup__close')) {
+      onPopupCloseClicl();
+    }
+    var filteredOffers = updateOffers();
+    if (filteredOffers.length > window.data.MAX_PIN_NUMBER) {
+      filteredOffers = window.utils.getRandomFromArray(filteredOffers, window.data.MAX_PIN_NUMBER);
+    }
+    //  удаление предыдущих меток жилья
+    while (window.elements.mapPins.children.length > 2) {
+      window.elements.mapPins.removeChild(window.elements.mapPins.children[1]);
+    }
+    //  метки для массива предложений
+    filteredOffers.forEach(function (elem) {
+      getMapPinElement(elem);
+    });
+    window.elements.mapPins.insertBefore(
+        window.fragment,
+        window.elements.mapPinMain
+    );
   };
 })();
