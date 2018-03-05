@@ -1,44 +1,160 @@
 'use strict';
 
 (function () {
-  //  Синхронизация полей «время заезда» и «время выезда»
-  var timeInField = document.querySelector('#timein');
-  var timeOutField = document.querySelector('#timeout');
+  //  кнопка «resset» в форме ввода
+  var resetFormButton = window.elements.noticeForm.querySelector('.form__reset');
 
-  var onChangeTimeIn = function () {
-    timeOutField.value = timeInField.value;
-  };
-  var onChangeTimeOut = function () {
-    timeInField.value = timeOutField.value;
+  //  начальные координаты главной метки
+  var formInitialValue = {
+    x: window.elements.mapPinMain.offsetLeft,
+    y: window.elements.mapPinMain.offsetTop,
   };
 
-  timeInField.addEventListener('change', onChangeTimeIn);
-  timeOutField.addEventListener('change', onChangeTimeOut);
-
-  //  синхронизация минимальнай цены с типом жилья
-  var apartmentType = document.querySelector('#type');
-  var apartmentPrice = document.querySelector('#price');
-
-  var onChangeApartmentType = function () {
-    apartmentPrice.min =
-      window.data.MIN_PRICES_BY_APARTMENT_TYPES[apartmentType.value];
+  //  значение поля element приводится к newValue
+  var syncValues = function (element, newValue) {
+    element.value = newValue;
   };
 
-  apartmentType.addEventListener('change', onChangeApartmentType);
+  //  минимальное значение поля element приводится к newValue
+  var syncValueWithMin = function (element, newValue) {
+    element.min = newValue;
+    element.placeholder = element.min;
+  };
 
-  //  синхронизация количества комнат и количества гостей
-  var roomNumber = document.querySelector('#room_number');
-  var capacity = document.querySelector('#capacity');
-  var capacityOptions = capacity.querySelectorAll('option');
-
-  var onChangeRoomNumber = function () {
-    var availableValues =
-      window.data.NUMBER_OF_ROOMS_FOR_GUESTS[roomNumber.value];
-    capacityOptions.forEach(function (item) {
-      item.disabled = !availableValues.includes(item.value);
-      item.selected = item.value === availableValues[0];
+  //  доступные значения поля element приводятся к значениям из массива newValues,
+  //  где первый элемент массива - это значение поля по умолчанию
+  var syncMultipleValues = function (element, newValues) {
+    var options = Array.from(element.options);
+    options.forEach(function (item) {
+      item.disabled = !newValues.includes(item.value);
+      item.selected = item.value === newValues[0];
     });
   };
 
-  roomNumber.addEventListener('change', onChangeRoomNumber);
+  //  синхронизация минимальнай цены с типом жилья
+  var setMinPrice = function () {
+    window.synchronizeFields(
+        window.elements.apartmentType,
+        window.elements.apartmentPrice,
+        ['flat', 'bungalo', 'house', 'palace'],
+        [1000, 0, 5000, 1e4],
+        syncValueWithMin
+    );
+  };
+
+  //  установка поля «время выезда» в зависимосити от значения поля «время заезда»
+  var setCheckOutTime = function () {
+    window.synchronizeFields(
+        window.elements.timeInField,
+        window.elements.timeOutField,
+        ['12:00', '13:00', '14:00'],
+        ['12:00', '13:00', '14:00'],
+        syncValues
+    );
+  };
+
+  //  установка поля «время заезда» в зависимосити от значения поля «время выезда»
+  var setCheckInTime = function () {
+    window.synchronizeFields(
+        window.elements.timeOutField,
+        window.elements.timeInField,
+        ['12:00', '13:00', '14:00'],
+        ['12:00', '13:00', '14:00'],
+        syncValues
+    );
+  };
+
+  //  синхронизация количества комнат и количества гостей
+  var setGuestsAmount = function () {
+    window.synchronizeFields(
+        window.elements.roomNumber,
+        window.elements.capacity,
+        ['1', '2', '3', '100'],
+        [['1', '2'], ['2', '1'], ['3', '1', '2'], ['0']],
+        syncMultipleValues
+    );
+  };
+
+  //  обработчик на отправку формы
+  var onSubmitForm = function (evt) {
+    window.backend.save(
+        new FormData(window.elements.noticeForm),
+        onSuccessSubmit,
+        onErrorSubmit
+    );
+    evt.preventDefault();
+  };
+
+  //  обработчик на отправку формы
+  var onChangeForm = function (evt) {
+    if (evt.target === window.elements.timeInField) {
+      setCheckOutTime();
+    }
+    if (evt.target === window.elements.timeOutField) {
+      setCheckInTime();
+    }
+    if (evt.target === window.elements.apartmentType) {
+      setMinPrice();
+    }
+    if (evt.target === window.elements.roomNumber) {
+      setGuestsAmount();
+    }
+  };
+
+  //  синхронизация всех полей формы
+  var synchronizeForm = function () {
+    setCheckOutTime();
+    setMinPrice();
+    setGuestsAmount();
+  };
+
+  //  установка главной метки в начальное положение
+  var resetMainPin = function () {
+    window.elements.noticeForm.reset();
+    window.elements.mapPinMain.style.left = formInitialValue.x + 'px';
+    window.elements.mapPinMain.style.top = formInitialValue.y + 'px';
+    window.setAddress();
+  };
+
+  //  установка данных формы на значения по умолчанию
+  var onResetFormClick = function (evt) {
+    evt.preventDefault();
+    resetMainPin();
+    synchronizeForm();
+  };
+
+  //  обработчик на нажатие «Enter» на сфокусированной кнопке «Reset»
+  var onResetFormPressEnter = function (evt) {
+    if (evt.keyCode === window.data.ENTER_KEYCODE) {
+      onResetFormClick();
+    }
+  };
+
+  //  callback на успешную отправку данных формы
+  var onSuccessSubmit = function () {
+    window.message.show(
+        'Успех',
+        'Ваш вариант успешно добавлен в базу',
+        window.message.color.SUCCESS
+    );
+    window.elements.noticeForm.reset();
+    window.elements.mapPinMain.style.left = formInitialValue.x + 'px';
+    window.elements.mapPinMain.style.top = formInitialValue.y + 'px';
+    window.setAddress();
+    synchronizeForm();
+  };
+
+  //  callback на возникновение ошибки при отправке данных формы
+  var onErrorSubmit = function (error) {
+    window.message.show('Ошибка!', error, window.message.color.ERROR);
+  };
+
+  //  синхронизация всех полей формы при загрузке страницы
+  synchronizeForm();
+
+  //  установка отслеживания на взаимодействие с формой
+  window.elements.noticeForm.addEventListener('change', onChangeForm);
+  window.elements.noticeForm.addEventListener('submit', onSubmitForm);
+  resetFormButton.addEventListener('click', onResetFormClick);
+  resetFormButton.addEventListener('keydown', onResetFormPressEnter);
 })();
