@@ -13,8 +13,11 @@
     notice: notice,
     mapPins: map.querySelector('.map__pins'),
     mapPinMain: map.querySelector('.map__pin--main'),
+    mapPinMainImage: map.querySelector('.map__pin--main img'),
     noticeForm: notice.querySelector('.notice__form'),
+    noticePreview: notice.querySelector('.notice__preview img'),
     noticeFormElements: notice.querySelectorAll('fieldset'),
+    noticePhotoContainer: notice.querySelector('.form__photo-container'),
     popupClose: document.querySelector('.popup__close'),
     addressInput: document.querySelector('#address'),
     timeInField: document.querySelector('#timein'),
@@ -29,5 +32,7 @@
     roomsNumberFilter: document.querySelector('#housing-rooms'),
     guestsNumberFilter: document.querySelector('#housing-guests'),
     featuresFilter: document.querySelector('#housing-features'),
+    featuresAvatar: document.querySelector('#avatar'),
+    housingImages: document.querySelector('#images'),
   };
 })();

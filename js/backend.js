@@ -2,6 +2,14 @@
 
 (function () {
   var SERVER_URL = 'https://js.dump.academy/keksobooking';
+  var SUCCESS_STATUS = 200;
+  var TIMEOUT = 30000;
+  var ERROR_MESSAGE = {
+    '400': 'Неверный запрос.',
+    '401': 'Пользователь не авторизован.',
+    '404': 'Ничего не найдено.',
+    '500': 'Ошибка сервера.'
+  };
 
   //  формирование запроса на сервер и обработка ответной реакции сервера
   var setup = function (onSuccess, onError) {
@@ -9,19 +17,23 @@
     xhr.responseType = 'json';
 
     xhr.addEventListener('load', function () {
-      if (xhr.status === 200) {
+      if (xhr.status === SUCCESS_STATUS) {
         onSuccess(xhr.response);
       } else {
-        onError(xhr.response);
+        var error = ERROR_MESSAGE[xhr.status] ||
+        'Неизвестный статус: ' + xhr.status + ' ' + xhr.statusText;
+        onError(error);
       }
     });
+
     xhr.addEventListener('error', function () {
       onError('Произошла ошибка соединения.');
     });
+
     xhr.addEventListener('timeout', function () {
       onError('Запрос не успел выполниться за ' + xhr.timeout + 'мс.');
     });
-    xhr.timeout = 30000;
+    xhr.timeout = TIMEOUT;
     return xhr;
   };
 

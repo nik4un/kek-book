@@ -39,11 +39,11 @@
   var getFeatureItems = function (features) {
     var listFragment = document.createDocumentFragment();
     var listItem;
-    for (var j = 0; j < features.length; j += 1) {
+    features.forEach(function (item) {
       listItem = document.createElement('li');
-      listItem.className = 'feature feature--' + features[j];
+      listItem.className = 'feature feature--' + item;
       listFragment.appendChild(listItem);
-    }
+    });
     return listFragment;
   };
 
@@ -86,10 +86,11 @@
     offerCard.querySelector('p:nth-of-type(5)').textContent =
       offersItem.offer.description;
     //  фото жилья
-    for (var i = 0; i < offersItem.offer.photos.length; i += 1) {
-      pictureList.appendChild(pictureList.children[0].cloneNode(true));
-    }
     offersItem.offer.photos.forEach(function (photoAdr, index) {
+      if (index > 0) {
+        pictureList.appendChild(pictureList.children[0].cloneNode(true));
+      }
+
       var imgElement = pictureList.children[index].querySelector('img');
       imgElement.setAttribute('src', photoAdr);
       imgElement.setAttribute('style', 'width: 40px; height: 40px; margin-right: 2px;');

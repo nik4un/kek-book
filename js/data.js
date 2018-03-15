@@ -16,7 +16,7 @@
   ];
   var PRICE = {
     min: 100,
-    max: 1e6
+    max: 1000000
   };
 
   var ROOMS = {
@@ -96,7 +96,7 @@
     APARTMENT_TYPE_RU: {
       flat: 'Квартира',
       house: 'Дом',
-      bungalo: 'Бунгало'
+      bungalo: 'Лачуга'
     },
     //  минимальная цена для каждого типа апартаментов
     MIN_PRICES_BY_APARTMENT_TYPES: {

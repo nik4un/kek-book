@@ -145,6 +145,5 @@
   var onErrorLoad = function (error) {
     var messageError = error + ' Похожие предложения не могут быть отображены';
     window.message.show('Ошибка!', messageError, window.message.color.ERROR);
-    // window.elements.noticeForm.classList.remove('notice__form--disabled');
   };
 })();
