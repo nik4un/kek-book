@@ -1,13 +1,19 @@
 'use strict';
 
 (function () {
-  //  кнопка «resset» в форме ввода
+  //  кнопка «reset» в форме ввода
   var resetFormButton = window.elements.noticeForm.querySelector('.form__reset');
 
   //  начальные координаты главной метки
   var formInitialValue = {
     x: window.elements.mapPinMain.offsetLeft,
     y: window.elements.mapPinMain.offsetTop,
+  };
+
+  //  начальные изображения аватара
+  var avatarInitialImage = {
+    avatarImage: window.elements.noticePreview.src,
+    mapPinMainImage: window.elements.mapPinMainImage.src,
   };
 
   //  значение поля element приводится к newValue
@@ -37,7 +43,7 @@
         window.elements.apartmentType,
         window.elements.apartmentPrice,
         ['flat', 'bungalo', 'house', 'palace'],
-        [1000, 0, 5000, 1e4],
+        [1000, 0, 5000, 10000],
         syncValueWithMin
     );
   };
@@ -85,19 +91,16 @@
     evt.preventDefault();
   };
 
-  //  обработчик на отправку формы
+  //  обработчик на изменение формы
+  var selectedField = {
+    'timein': setCheckOutTime,
+    'timeout': setCheckInTime,
+    'type': setMinPrice,
+    'rooms': setGuestsAmount
+  };
   var onChangeForm = function (evt) {
-    if (evt.target === window.elements.timeInField) {
-      setCheckOutTime();
-    }
-    if (evt.target === window.elements.timeOutField) {
-      setCheckInTime();
-    }
-    if (evt.target === window.elements.apartmentType) {
-      setMinPrice();
-    }
-    if (evt.target === window.elements.roomNumber) {
-      setGuestsAmount();
+    if (evt.target.name in selectedField) {
+      selectedField[evt.target.name]();
     }
   };
 
@@ -121,6 +124,9 @@
     evt.preventDefault();
     resetMainPin();
     synchronizeForm();
+    window.elements.noticePreview.src = avatarInitialImage.avatarImage;
+    window.elements.mapPinMainImage.src = avatarInitialImage.mapPinMainImage;
+    window.loadImages.clear(window.elements.noticePhotoContainer);
   };
 
   //  обработчик на нажатие «Enter» на сфокусированной кнопке «Reset»

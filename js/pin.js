@@ -2,19 +2,9 @@
 
 (function () {
   //  диапозон цен в меню выбора цен
-  var priceRange = {
-    low: {
-      min: 0,
-      max: 10000,
-    },
-    middle: {
-      min: 10000,
-      max: 50000,
-    },
-    high: {
-      min: 50000
-    }
-  };
+  var LOW_PRICE_LEVEL = 0;
+  var MIDDLE_PRICE_LEVEL = 10000;
+  var HIGH_PRICE_LEVEL = 50000;
 
   // фрагмент для меток предложений на карте
   window.fragment = document.createDocumentFragment();
@@ -122,9 +112,9 @@
           : filterCollect.housingType === item.offer.type;
       var housingPriceCondition = {
         'any': true,
-        'low': item.offer.price >= priceRange.low.min && item.offer.price <= priceRange.low.max,
-        'middle': item.offer.price >= priceRange.middle.min && item.offer.price <= priceRange.middle.max,
-        'high': item.offer.price >= priceRange.high.min,
+        'low': item.offer.price >= LOW_PRICE_LEVEL && item.offer.price <= MIDDLE_PRICE_LEVEL,
+        'middle': item.offer.price >= MIDDLE_PRICE_LEVEL && item.offer.price <= HIGH_PRICE_LEVEL,
+        'high': item.offer.price >= HIGH_PRICE_LEVEL,
       };
       var housingRoomsCondition =
         filterCollect.roomsNumber === 'any'
